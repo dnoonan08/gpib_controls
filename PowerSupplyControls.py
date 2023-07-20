@@ -210,7 +210,7 @@ class ObelixSupplies(gpibControl):
 #        resistance=float(self.gpib.read()[:-1])
         temperature=((resistance/1000)-1)/0.00385
         return temperature, resistance
-        
+
     def ConfigReadCurrent(self):
         self.select(12)
         self.gpib.write("*RST")
@@ -221,3 +221,22 @@ class ObelixSupplies(gpibControl):
         self.select(12)
         current=float(self.gpib.query(":READ?"))
         return current
+
+knownModelTypes=['Agilent Technologies,E3648A,0,1.7-5.0-1.0',
+                 'Agilent Technologies,E3642A,0,1.6-5.0-1.0',
+                 'HEWLETT-PACKARD,E3633A,0,1.7-5.0-1.0']
+
+def getPowerSupply(ip, addr):
+    ps=gpibControl(ip,addr)
+    model=ps.ID()
+    ps.disconnect()
+    ps.close()
+
+    assert model in knownModelTypes
+
+    if model=='Agilent Technologies,E3648A,0,1.7-5.0-1.0':
+        return Agilent3648A(ip,addr)
+    if model=='Agilent Technologies,E3642A,0,1.6-5.0-1.0':
+        return Agilent3642A(ip,addr)
+    if model=='HEWLETT-PACKARD,E3633A,0,1.7-5.0-1.0':
+        return Agilent3633A(ip,addr)

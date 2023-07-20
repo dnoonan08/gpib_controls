@@ -6,7 +6,7 @@ GPIBAddresses={46:6,
               15:15,
               }
 
-from PowerSupplyControls import Agilent3648A, Agilent3633A, Agilent3642A
+from PowerSupplyControls import getPowerSupply
 
 
 if __name__=='__main__':
@@ -29,15 +29,7 @@ if __name__=='__main__':
 
     args = parser.parse_args()
 
-    if args.addr==8:
-        ps=Agilent3648A(host=args.ip,addr=8)
-    elif args.addr==6:
-        ps=Agilent3633A(host=args.ip,addr=6)
-    elif args.addr==4:
-        ps=Agilent3642A(host=args.ip,addr=4)
-    else:
-        print("This script is not configured to use this address")
-        sys.exit()
+    ps=getPowerSupply(args.ip,args.addr)
 
     if args.On:
         ps.SetLimits_2(v=0,i=0.6)
