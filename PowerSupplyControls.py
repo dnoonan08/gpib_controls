@@ -1,4 +1,4 @@
-from plx_gpib_ethernet import PrologixGPIBEthernet
+from .plx_gpib_ethernet import PrologixGPIBEthernet
 
 class gpibControl:
     def __init__(self, host, addr):
