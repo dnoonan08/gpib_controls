@@ -172,6 +172,17 @@ class ObelixSupplies(gpibControl):
             print(f'Selected voltage ({voltage}) outside of defined safe range 0.9-1.5')
             return False
 
+    def SetLimits(self, voltage, current=0.6):
+        self.select_addr(6)
+
+        if float(voltage)<=1.5 and float(voltage) >= 0.9:
+            self.gpib.write(f"V {voltage}")
+            self.gpib.write(f"I {current}")
+            return True
+        else:
+            print(f'Selected voltage ({voltage}) outside of defined safe range 0.9-1.5')
+            return False
+
     def ASICOn(self,voltage=None):
         self.select_addr(6)
         x=self.gpib.query('++addr')
@@ -190,7 +201,7 @@ class ObelixSupplies(gpibControl):
 #        x=self.gpib.query('++addr')
         self.gpib.write("OP 0")
 
-    def Read_Power(self):
+    def ReadPower(self):
         self.select_addr(6)
 #        x=self.gpib.query('++addr')
 #        print(x)
