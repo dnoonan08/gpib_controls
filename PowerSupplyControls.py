@@ -159,8 +159,11 @@ class Agilent3633A(gpibControl):
 
 
 class ObelixSupplies(gpibControl):
+    def select_addr(self, addr):
+        self.gpib.select(addr)
+
     def SetVoltage(self, voltage):
-        self.select(8)
+        self.select_addr(6)
 
         if float(voltage)<=1.5 and float(voltage) >= 0.9:
             self.gpib.write(f"V {voltage}")
@@ -170,55 +173,57 @@ class ObelixSupplies(gpibControl):
             return False
 
     def ASICOn(self,voltage=None):
-        self.select(8)
+        self.select_addr(6)
         x=self.gpib.query('++addr')
 
         if voltage is None:
-            is_set=self.SetVoltage(None,1.2)
+            is_set=self.SetVoltage(1.2)
         else:
-            is_set=self.SetVoltage(None,float(voltage))
+            is_set=self.SetVoltage(float(voltage))
 
         if is_set:
             self.gpib.write("I 0.6")
             self.gpib.write("OP 1")
 
     def ASICOff(self):
-        self.select(8)
-        x=self.gpib.query('++addr')
+        self.select_addr(6)
+#        x=self.gpib.query('++addr')
         self.gpib.write("OP 0")
 
     def Read_Power(self):
-        self.select(8)
+        self.select_addr(6)
 #        x=self.gpib.query('++addr')
 #        print(x)
-#        output=self.gpib.query("OUTP?")[:-1]
-        output="1"
-        v=self.gpib.query("VO?")[:-2]
+        output=self.gpib.query("OUTP?")[:-1]
+#        output="1"
+        v=self.gpib.query("VO?")
+        print(v)
+        v=v[:-2]
         i=self.readCurrent()
 #        i=self.gpib.query("IO?")[:-2]
         return output,v,i
 
     def ConfigRTD(self):
-        self.select(12)
+        self.select_addr(14)
         self.gpib.write('*RST')
         self.gpib.write("FUNC 'FRES'")
         self.gpib.write("FRES:RANG 1E3")
 
     def readRTD(self):
-        self.select(12)
+        self.select_addr(14)
         resistance=float(self.gpib.query(":READ?"))
 #        resistance=float(self.gpib.read()[:-1])
         temperature=((resistance/1000)-1)/0.00385
         return temperature, resistance
 
     def ConfigReadCurrent(self):
-        self.select(12)
+        self.select_addr(14)
         self.gpib.write("*RST")
         self.gpib.write("FUNC 'CURR:DC'")
         self.gpib.write("CURR:RANGE 1.")
 
     def readCurrent(self):
-        self.select(12)
+        self.select_addr(14)
         current=float(self.gpib.query(":READ?"))
         return current
 
