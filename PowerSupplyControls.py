@@ -203,15 +203,12 @@ class ObelixSupplies(gpibControl):
 
     def ReadPower(self):
         self.select_addr(6)
-#        x=self.gpib.query('++addr')
-#        print(x)
-        output=self.gpib.query("OUTP?")[:-1]
-#        output="1"
+        # x=self.gpib.query('++addr')
+        # output=self.gpib.query("OP 0?")
+        output=1
         v=self.gpib.query("VO?")
-        print(v)
-        v=v[:-2]
+        v=float(v[:-2])
         i=self.readCurrent()
-#        i=self.gpib.query("IO?")[:-2]
         return output,v,i
 
     def ConfigRTD(self):
