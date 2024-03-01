@@ -1,8 +1,10 @@
-from .plx_gpib_ethernet import PrologixGPIBEthernet
+import sys,os
+sys.path.append(os.path.dirname(__file__))
+import plx_gpib_ethernet
 
 class gpibControl:
     def __init__(self, host, addr):
-        self.gpib = PrologixGPIBEthernet(host=host)
+        self.gpib = plx_gpib_ethernet.PrologixGPIBEthernet(host=host)
         self.gpib.connect()
         self.addr=addr
 
@@ -44,9 +46,11 @@ class Agilent3648A(gpibControl):
         return self.gpib.query("OUTP:STAT?")[:-1]
 
     def TurnOn(self):
+        self.select()
         self.gpib.write("OUTP ON")
 
     def TurnOff(self):
+        self.select()
         self.gpib.write("OUTP OFF")
 
     def ReadPower(self, output=1):
@@ -75,6 +79,7 @@ class Agilent3648A(gpibControl):
         return self.ReadLimits(2)
 
     def SetLimits(self, voltage, current, output=1):
+        self.select()
         self.gpib.write(f"INST:SEL OUT{output}\nVOLT {voltage}")
         self.gpib.write(f"INST:SEL OUT{output}\nCURR {current}")
 
@@ -98,9 +103,11 @@ class Agilent3642A(gpibControl):
         return self.gpib.query("OUTP:STAT?")[:-1]
 
     def TurnOn(self):
+        self.select()
         self.gpib.write("OUTP ON")
 
     def TurnOff(self):
+        self.select()
         self.gpib.write("OUTP OFF")
 
     def ReadPower(self):
@@ -117,6 +124,7 @@ class Agilent3642A(gpibControl):
         return float(v),float(i)
 
     def SetLimits(self, voltage, current):
+        self.select()
         self.gpib.write(f"VOLT {voltage}")
         self.gpib.write(f"CURR {current}")
 
@@ -134,9 +142,11 @@ class Agilent3633A(gpibControl):
         return self.gpib.query("OUTP:STAT?")[:-1]
 
     def TurnOn(self):
+        self.select()
         self.gpib.write("OUTP ON")
 
     def TurnOff(self):
+        self.select()
         self.gpib.write("OUTP OFF")
 
     def ReadPower(self):
@@ -153,6 +163,7 @@ class Agilent3633A(gpibControl):
         return float(v),float(i)
 
     def SetLimits(self, voltage, current):
+        self.select()
         self.gpib.write(f"VOLT {voltage}")
         self.gpib.write(f"CURR {current}")
 
