@@ -12,8 +12,14 @@ logger = logging.getLogger("gpib_server")
 
 
 powerSupplies={}
-for addr in ['44','46','48']:
-    powerSupplies[addr] = getPowerSupply('192.168.1.50',addr[-1])
+for addr in ['43','44','46','48']:
+    try:
+        powerSupplies[addr] = getPowerSupply('192.168.1.50',addr[-1])
+        logger.info(f'Found power supply {addr} on gpib with ip 192.168.1.50')
+    except:
+        powerSupplies[addr] = getPowerSupply('192.168.1.51',addr[-1])
+        logger.info(f'Found power supply {addr} on gpib with ip 192.168.1.51')
+
     powerSupplies[addr].disconnect()
     powerSupplies[addr].close()
 
