@@ -58,7 +58,10 @@ class Agilent3648A(gpibControl):
         v=self.gpib.query(f"INST:SEL OUT{output}\nMEAS:VOLT?")[:-1]
         i=self.gpib.query(f"INST:SEL OUT{output}\nMEAS:CURR?")[:-1]
         p=self.gpib.query("OUTP:STAT?")[:-1]
-        return int(p), float(v),float(i)
+        try:
+            return int(p), float(v),float(i)
+        except:
+            return -1, -1, -1
 
     def ReadPower_1(self):
         return self.ReadPower(1)
@@ -115,7 +118,10 @@ class Agilent3642A(gpibControl):
         v=self.gpib.query(f"MEAS:VOLT?")[:-1]
         i=self.gpib.query(f"MEAS:CURR?")[:-1]
         p=self.gpib.query("OUTP:STAT?")[:-1]
-        return int(p), float(v),float(i)
+        try:
+            return int(p), float(v),float(i)
+        except:
+            return -1, -1, -1
 
     def ReadLimits(self):
         self.select()
@@ -154,7 +160,10 @@ class Agilent3633A(gpibControl):
         v=self.gpib.query(f"MEAS:VOLT?")[:-1]
         i=self.gpib.query(f"MEAS:CURR?")[:-1]
         p=self.gpib.query("OUTP:STAT?")[:-1]
-        return int(p), float(v),float(i)
+        try:
+            return int(p), float(v),float(i)
+        except:
+            return -1, -1, -1
 
     def ReadLimits(self):
         self.select()
