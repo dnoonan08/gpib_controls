@@ -82,9 +82,13 @@ class Agilent3648A(gpibControl):
         return self.ReadLimits(2)
 
     def SetLimits(self, voltage, current, output=1):
-        self.select()
-        self.gpib.write(f"INST:SEL OUT{output}\nVOLT {voltage}")
-        self.gpib.write(f"INST:SEL OUT{output}\nCURR {current}")
+        if voltage >= 0.6 and voltage<=1.5:
+            self.select()
+            self.gpib.write(f"INST:SEL OUT{output}\nVOLT {voltage}")
+            self.gpib.write(f"INST:SEL OUT{output}\nCURR {current}")
+        else:
+            print(f'Selected voltage ({voltage}) outside of defined safe range 0.6-1.5')
+            return False
 
     def SetLimits_1(self,v=1.2,i=0.6):
         self.SetLimits(output=1, voltage=v, current=i)
@@ -130,9 +134,13 @@ class Agilent3642A(gpibControl):
         return float(v),float(i)
 
     def SetLimits(self, voltage, current):
-        self.select()
-        self.gpib.write(f"VOLT {voltage}")
-        self.gpib.write(f"CURR {current}")
+        if voltage >= 0.6 and voltage<=1.5:
+            self.select()
+            self.gpib.write(f"VOLT {voltage}")
+            self.gpib.write(f"CURR {current}")
+        else:
+            print(f'Selected voltage ({voltage}) outside of defined safe range 0.6-1.5')
+            return False
 
 
 class Agilent3633A(gpibControl):
@@ -172,9 +180,13 @@ class Agilent3633A(gpibControl):
         return float(v),float(i)
 
     def SetLimits(self, voltage, current):
-        self.select()
-        self.gpib.write(f"VOLT {voltage}")
-        self.gpib.write(f"CURR {current}")
+        if voltage >= 0.6 and voltage<=1.5:
+            self.select()
+            self.gpib.write(f"VOLT {voltage}")
+            self.gpib.write(f"CURR {current}")
+        else:
+            print(f'Selected voltage ({voltage}) outside of defined safe range 0.6-1.5')
+            return False
 
 
 
