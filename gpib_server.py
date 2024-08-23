@@ -17,11 +17,15 @@ for addr in ['43','44','46','48']:
         powerSupplies[addr] = getPowerSupply('192.168.1.50',addr[-1])
         logger.info(f'Found power supply {addr} on gpib with ip 192.168.1.50')
     except:
-        powerSupplies[addr] = getPowerSupply('192.168.1.51',addr[-1])
-        logger.info(f'Found power supply {addr} on gpib with ip 192.168.1.51')
-
-    powerSupplies[addr].disconnect()
-    powerSupplies[addr].close()
+        try:
+            powerSupplies[addr] = getPowerSupply('192.168.1.51',addr[-1])
+            logger.info(f'Found power supply {addr} on gpib with ip 192.168.1.51')
+        except:
+            logger.error(f'Power supply with address {addr} not found on gpib')
+            powerSupplies[addr] = None
+    if powerSupplies[addr]:
+        powerSupplies[addr].disconnect()
+        powerSupplies[addr].close()
 
 def gpib_call(input_message):
     """
@@ -40,16 +44,23 @@ def gpib_call(input_message):
             print('No command specified')
             return ''
         elif message[1]=='Ping':
-            ps.reconnect()
-            output=ps.ReadPower()
-            ps.disconnect()
-            ps.close()
+            try:
+                ps.reconnect()
+                output=ps.ReadPower()
+                ps.disconnect()
+                ps.close()
+            except:
+                output=[-1,-1,-1]
             output=output[0]
         elif message[1]=='ReadPower':
-            ps.reconnect()
-            output=ps.ReadPower()
-            ps.disconnect()
-            ps.close()
+            try:
+                ps.reconnect()
+                output=ps.ReadPower()
+                ps.disconnect()
+                ps.close()
+            except:
+                output=[-1,-1,-1]
+
         elif message[1]=='SetVoltage':
             ps.reconnect()
             ps.SetLimits(float(message[2]),0.6)
