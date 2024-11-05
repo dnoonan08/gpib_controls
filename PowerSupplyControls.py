@@ -1,6 +1,7 @@
 import sys,os
 sys.path.append(os.path.dirname(__file__))
 import plx_gpib_ethernet
+import socket
 
 class gpibControl:
     def __init__(self, host, addr):
@@ -32,6 +33,85 @@ class gpibControl:
         self.select()
         return self.gpib.query(q)[:-1]
 
+class SiglentSPD1168X:
+    PORT=5025
+    def __init__(self, ip, timeout=1):
+        self.host = ip
+        self.socket = socket.socket(socket.AF_INET,
+                                    socket.SOCK_STREAM,
+                                    socket.IPPROTO_TCP)
+        self.socket.settimeout(timeout)
+        self.connect()
+
+    def connect(self):
+        self.socket.connect((self.host, self.PORT))
+
+    def reconnect(self):
+        self.socket.close()
+        self.socket = socket.socket(socket.AF_INET,
+                                    socket.SOCK_STREAM,
+                                    socket.IPPROTO_TCP)
+        self.socket.connect((self.host, self.PORT))
+
+    def disconnect(self):
+        return
+
+    def close(self):
+        self.socket.close()
+        return
+
+    def ID(self):
+        return self.query('*IDN?')[:-1]
+
+    def query(self, cmd, buffer_size=1024*1024):
+        self.write(cmd)
+        return self.read(buffer_size)
+
+    def write(self, cmd):
+        self._send(cmd)
+
+    def read(self, num_bytes=1024):
+        return self._recv(num_bytes)
+
+    def _send(self, value):
+        encoded_value = ('%s\n' % value).encode('ascii')
+        self.socket.send(encoded_value)
+
+    def _recv(self, byte_num):
+        value = self.socket.recv(byte_num)
+        return value.decode('ascii')
+
+    def IsOn(self):
+        stat=int(self.query("SYST:STAT?")[:-1],16)
+        return (stat>>4)&1
+
+    def TurnOn(self):
+        self.write("OUTP CH1,ON")
+
+    def TurnOff(self):
+        self.write("OUTP CH1,OFF")
+
+    def ReadPower(self):
+        v=self.query(f"MEAS:VOLT?")[:-1]
+        i=self.query(f"MEAS:CURR?")[:-1]
+        p=self.IsOn()
+        try:
+            return int(p), float(v),float(i)
+        except:
+            return -1, -1, -1
+
+    def ReadLimits(self):
+        v=self.query(f"VOLT?")[:-1]
+        i=self.query(f"CURR?")[:-1]
+        return float(v),float(i)
+
+    def SetLimits(self, voltage, current):
+        if voltage >= 0.6 and voltage<=1.5:
+            self.write(f"VOLT {voltage}")
+            self.write(f"CURR {current}")
+        else:
+            print(f'Selected voltage ({voltage}) outside of defined safe range 0.6-1.5')
+            return False
 
 class Agilent3648A(gpibControl):
     def __init__(self, host, addr):

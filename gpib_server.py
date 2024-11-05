@@ -12,7 +12,7 @@ logger = logging.getLogger("gpib_server")
 
 
 powerSupplies={}
-for addr in ['43','44','46','48']:
+for addr in ['42','43','44','46','48']:
     try:
         powerSupplies[addr] = getPowerSupply('192.168.1.50',addr[-1])
         logger.info(f'Found power supply {addr} on gpib with ip 192.168.1.50')
@@ -21,8 +21,12 @@ for addr in ['43','44','46','48']:
             powerSupplies[addr] = getPowerSupply('192.168.1.51',addr[-1])
             logger.info(f'Found power supply {addr} on gpib with ip 192.168.1.51')
         except:
-            logger.error(f'Power supply with address {addr} not found on gpib')
-            powerSupplies[addr] = None
+            try:
+                powerSupplies[addr] = SiglentSPD1168X(f'192.168.1.1{addr}')
+                logger.info(f'Found power supply {addr} on gpib with ip 192.168.1.1{addr}')
+            except:
+                logger.error(f'Power supply with address {addr} not found on gpib')
+                powerSupplies[addr] = None
     if powerSupplies[addr]:
         powerSupplies[addr].disconnect()
         powerSupplies[addr].close()
