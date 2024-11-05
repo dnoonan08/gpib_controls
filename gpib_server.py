@@ -4,7 +4,7 @@ import zmq
 import time
 import sys
 import random
-from PowerSupplyControls import getPowerSupply
+from PowerSupplyControls import getPowerSupply, SiglentSPD1168X
 import logging
 
 logging.basicConfig(filename='server_log.log', level=logging.INFO, format="[%(asctime)s] %(levelname)-2s: %(name)-15s %(message)s")
