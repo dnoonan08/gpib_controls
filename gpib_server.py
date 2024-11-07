@@ -83,6 +83,14 @@ def gpib_call(input_message):
             ps.disconnect()
             ps.close()
             output=f'Turning Off {addr}'
+        elif message[1]=='ID':
+            try:
+                ps.reconnect()
+                output=ps.ID()
+                ps.disconnect()
+                ps.close()
+            except:
+                output='UNKNOWN POWER SUPPLY'
         else:
             print(f'Bad Command {message}')
             output='UNKOWN COMMAND'
