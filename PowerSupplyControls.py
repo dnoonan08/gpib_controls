@@ -54,6 +54,7 @@ class SiglentSPD1168X:
         self.socket.connect((self.host, self.PORT))
 
     def disconnect(self):
+        self.write('*UNLOCK')
         return
 
     def close(self):
