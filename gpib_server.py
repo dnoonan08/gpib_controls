@@ -91,6 +91,15 @@ def gpib_call(input_message):
                 ps.close()
             except:
                 output='UNKNOWN POWER SUPPLY'
+        elif message[1]=='SetRemote':
+            ps.reconnect()
+            if message[2]=='4W':
+                ps.Set4Wire()
+            elif message[2]=='2W':
+                ps.Set2Wire()
+            ps.disconnect()
+            ps.close()
+            output=f'Setting {addr} to {message[2]} mode'
         else:
             print(f'Bad Command {message}')
             output='UNKOWN COMMAND'

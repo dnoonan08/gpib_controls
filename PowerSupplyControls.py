@@ -64,6 +64,12 @@ class SiglentSPD1168X:
     def ID(self):
         return self.query('*IDN?')[:-1]
 
+    def Set4Wire(self):
+        self.write('MOE:SET 4W')
+
+    def Set2Wire(self):
+        self.write('MOE:SET 2W')
+
     def query(self, cmd, buffer_size=1024*1024):
         self.write(cmd)
         return self.read(buffer_size)
