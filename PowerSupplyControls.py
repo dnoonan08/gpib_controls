@@ -354,6 +354,121 @@ class ObelixSupplies(gpibControl):
         current=float(self.gpib.query(":READ?"))
         return current
 
+class ObelixRTD(gpibControl):
+    def select_addr(self, addr):
+        self.gpib.select(addr)
+
+    def ConfigRTD(self):
+        self.select_addr(14)
+        self.gpib.write('*RST')
+        self.gpib.write("FUNC 'FRES'")
+        self.gpib.write("FRES:RANG 1E3")
+
+    def readRTD(self):
+        self.select_addr(14)
+        resistance=float(self.gpib.query(":READ?"))
+        temperature=((resistance/1000)-1)/0.00385
+        return temperature, resistance
+
+class ObelixPower:
+    def __init__(self, ip, gpib_ip, timeout=1):
+        self.host = ip
+        self.PORT = 9221
+        self.gpib_ip = gpib_ip
+        self.socket = socket.socket(socket.AF_INET,
+                                    socket.SOCK_STREAM,
+                                    socket.IPPROTO_TCP)
+        self.socket.settimeout(timeout)
+        self.connect()
+        try:
+                self.gpib = gpibControl(gpib_ip,14)
+        except:
+            self.gpib = None
+
+    def connect(self):
+        self.socket.connect((self.host, self.PORT))
+
+    def reconnect(self):
+        self.socket.close()
+        self.socket = socket.socket(socket.AF_INET,
+                                    socket.SOCK_STREAM,
+                                    socket.IPPROTO_TCP)
+        self.socket.connect((self.host, self.PORT))
+
+    def disconnect(self):
+        self.write('*UNLOCK')
+        return
+
+    def close(self):
+        self.socket.close()
+        return
+
+    def ID(self):
+        return self.query('*IDN?')[:-1]
+
+    def query(self, cmd, buffer_size=1024*1024):
+        self.write(cmd)
+        return self.read(buffer_size)
+
+    def write(self, cmd):
+        self._send(cmd)
+
+    def read(self, num_bytes=1024):
+        return self._recv(num_bytes)
+
+    def _send(self, value):
+        encoded_value = ('%s\n' % value).encode('ascii')
+        self.socket.send(encoded_value)
+
+    def _recv(self, byte_num):
+        value = self.socket.recv(byte_num)
+        return value.decode('ascii')
+
+    def IsOn(self,channel=1):
+        p = int(self.query(f"OP{channel}?")[:-2])
+        return p
+
+    def TurnOn(self,channel=1):
+        self.write(f"OP{channel} 1")
+
+    def TurnOff(self,channel=1):
+        self.write(f"OP{channel} 0")
+
+    def ReadPower(self,channel=1):
+        v=self.query(f"V{channel}O?")[:-3]
+        i=self.readCurrent()#query(f"I{channel}O?")[:-3]
+        output=self.IsOn()
+        try:
+            return int(output), float(v),float(i)
+        except:
+            return -1, -1, -1
+
+    def ReadLimits(self,channel=1):
+        v=self.query(f"V{channel}?")[3:-2]
+        i=self.query(f"I{channel}?")[3:-2]
+        return float(v),float(i)
+
+    def SetLimits(self, voltage, current,channel=1):
+        if voltage >= 0.6 and voltage<=1.5:
+            self.write(f"V{channel} {voltage}")
+            self.write(f"I{channel} {current}")
+        else:
+            print(f'Selected voltage ({voltage}) outside of defined safe range 0.6-1.5')
+            return False
+
+    def ConfigReadCurrent(self):
+        self.gpib.gpib.write("*RST")
+        self.gpib.gpib.write("FUNC 'CURR:DC'")
+        self.gpib.gpib.write("CURR:RANGE 1.")
+
+    def readCurrent(self):
+        try:
+            current=float(self.gpib.gpib.query(":READ?"))
+        except:
+            current = self.query(f"I1O?")[:-3]
+        return current
+
+
 knownModelTypes=['Agilent Technologies,E3648A,0,1.7-5.0-1.0',
                  'Agilent Technologies,E3642A,0,1.6-5.0-1.0',
                  'HEWLETT-PACKARD,E3633A,0,1.7-5.0-1.0']
